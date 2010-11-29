@@ -1,0 +1,114 @@
+@charset "utf-8";
+/* CSS Document */
+
+@import url("http://fonts.googleapis.com/css?family=Droid+Sans");
+@import url("http://fonts.googleapis.com/css?family=Inconsolata&subset=latin");
+@import url("evan-colors.css");
+/*****************************************
+ * CSS for the console
+ *****************************************/
+h1 { font-family: 'Droid Sans', arial, serif; }
+
+#wrapper {
+	margin:0 auto;
+	width:610px;
+	font-size:10pt;
+}
+
+pre {
+	margin:0;
+	padding:0;
+	font-family: 'Inconsolata', arial, serif;
+}
+
+div#shell, div#shell #input, div#shell #output {
+	margin:0;
+	padding:0;
+}
+div#shell, div#shell textarea {
+	margin:0;
+	font-family: 'Inconsolata', arial, serif;
+	font-size:10pt;
+	background-color:#333;
+	color:#ddd;
+}
+div#shell textarea {
+	resize:none;
+	width:100%;
+}
+div#shell #input {
+	height:16px;
+}
+
+div#shell {
+	padding:4px;
+	width:600px;
+	height:300px;
+	border:1px solid #888;
+	overflow-x: auto;
+	overflow-y: auto;
+}
+div#shell #input_textarea{
+	padding-left:35px;
+}
+div#shell #inputboxbefore {
+	float:left;
+	width:31px;
+	height:16px;
+	background:transparent url(../images/grey_arrow.png) no-repeat center center;
+}
+div#shell textarea, div#shell textarea:active, div#shell textarea:focus {
+	border:0;
+	outline:none;
+}
+
+div#shell .error {
+	color:#ff3333;
+}
+div#shell .error_before {
+	background:transparent url(../images/error.png) no-repeat center center;
+}
+div#shell .input {
+	color:#B1D1FA;
+}
+div#shell .input_before {
+	background:transparent url(../images/blue_arrow.png) no-repeat center center;
+}
+/*
+div#shell .input:before {
+ content: "> ";
+ color:#ddd;
+}*/
+div #shell .output_line {
+	padding-left:35px;
+}
+div #shell .before_line {
+	width:31px;
+	height:16px;
+	float:left;
+}
+div #shell #loading_line {
+	display: none;
+	background:transparent /*url(../images/loading.gif) no-repeat center left*/;
+	margin-left:10px;
+	height:16px;
+	padding-left:26px;
+	color:#555;
+}
+
+#hiddenfield {
+	visibility:hidden;
+}
+
+.shell-clickable {
+	cursor:pointer;
+}
+
+.clear {
+	clear:both;
+	content: "\0020";
+	display: block;
+	height: 0;
+	visibility: hidden;
+	overflow:hidden;
+}

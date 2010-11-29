@@ -1,0 +1,44 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>Python Interactive Shell</title>
+    
+    <link href="css/shell.css" rel="stylesheet" type="text/css">
+    <script src="http://code.jquery.com/jquery-1.4.4.min.js"></script>
+    <script src="js/console.js"></script>
+    
+</head>
+
+<body><div id="wrapper">
+	
+	<h1>Python Interactive Shell</h1>
+    
+  	<div id="shell" onClick="refocus()">
+    	<div id="output"></div>
+        <div id="loading_line">&nbsp;<!--Processing...--></div>
+		<div id="inputbox"> 
+			<div id="inputboxbefore"></div>
+			<div id="input_textarea">
+            	<textarea id="input" onKeyDown="inputKeydown(event)"></textarea>
+            </div>
+        </div>
+    </div>
+  	
+	<br/>
+    
+	<pre class="shell-clickable">import devpayments</pre><br>
+	<pre class="shell-clickable">devpay = devpayments.Client('your-api-key')</pre><br>
+	<pre class="shell-clickable">sample_card = {
+  'number': '4242424242424242',
+  'exp_month': 10,
+  'exp_year': 2011
+}
+</pre><br>
+	<pre class="shell-clickable">charge = devpay.execute(amount=2000, currency='usd', card=sample_card,
+                            mnemonic='customer@gmail.com')
+</pre>
+  
+</div>
+
+</body>
+</html>
