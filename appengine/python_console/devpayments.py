@@ -11,7 +11,10 @@ class Response(object):
     self.dict = d
 
   def __getattr__(self, name):
-    return self.dict[name]
+    try:
+      return self.dict[name]
+    except KeyError:
+      raise AttributeError
 
 class DevPayException(Exception):
   def __init__(self, msg):

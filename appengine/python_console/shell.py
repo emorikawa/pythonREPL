@@ -184,7 +184,7 @@ class FrontPageHandler(webapp.RequestHandler):
   """Creates a new session and renders the shell.html template.
   """
 
-  def get(self):
+  def post(self):
     # set up the session. TODO: garbage collect old shell sessions
     session_key = self.request.get('session')
     if session_key:
