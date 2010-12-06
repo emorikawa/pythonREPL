@@ -26,6 +26,7 @@
   	
 	<br/>
     
+    <h2>Making a simple charge</h2>
 	<pre class="shell-clickable">import devpayments</pre><br>
 	<pre class="shell-clickable">devpay = devpayments.Client('your-api-key')</pre><br>
 	<pre class="shell-clickable">sample_card = {
@@ -37,7 +38,36 @@
 	<pre class="shell-clickable">charge = devpay.execute(amount=2000, currency='usd', card=sample_card,
                             mnemonic='customer@gmail.com')
 </pre>
-  
+
+    <pre class="shell-clickable">charge.paid</pre>
+    <pre class="shell-clickable">charge = devpay.refund(id=charge.id)</pre>
+    <pre class="shell-clickable">charge.refunded</pre>
+    
+    <h2>Customers</h2>
+    <pre class="shell-clickable">subscription={
+        'amount': 2000,
+        'currency': 'usd',
+        'per': 'month'
+    }</pre>
+    <pre class="shell-clickable">cust = devpay.createCustomer(id=17116, mnemonic='johnsmith@gmail.com', subscription=subscription)</pre>
+
+    <pre class="shell-clickable">cust = devpay.updateCustomer(id=cust.id, card=sample_card)</pre>
+
+    <pre class="shell-clickable">cust.charges</pre>
+
+    <pre class="shell-clickable">cust.next_recurring_charge</pre>
+
+    <h2>Things going wrong</h2>
+    <pre class="shell-clickable">sample_card['exp_year'] = 2009</pre>
+    <pre class="shell-clickable">params = {'amount': 2000, 'currency': 'usd', 'card': sample_card, 'mnemonic': 'expired card'}</pre>
+    <pre class="shell-clickable">charge = devpay.execute(**params)</pre>
+    <pre class="shell-clickable">
+        try:
+            charge = devpay.execute(**params)
+        except devpayments.CardException as inst:
+            print 'The charge failed because:', inst
+    </pre>
+
 </div>
 
 </body>

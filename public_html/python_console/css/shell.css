@@ -7,7 +7,7 @@
 /*****************************************
  * CSS for the console
  *****************************************/
-h1 { font-family: 'Droid Sans', arial, serif; }
+html { font-family: 'Droid Sans', arial, serif; }
 
 #wrapper {
 	margin:0 auto;
