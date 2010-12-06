@@ -213,6 +213,11 @@ class StatementHandler(webapp.RequestHandler):
   """Evaluates a python statement in a given session and returns the result.
   """
 
+  def options(self):
+    self.response.headers['Content-Type'] = 'text/html'
+    self.response.headers.add_header('Access-Control-Allow-Origin','*')
+    self.response.headers.add_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
   def post(self):
     session_key = self.request.get('session')
     if session_key != None and session_key != 'null':
@@ -223,8 +228,9 @@ class StatementHandler(webapp.RequestHandler):
       session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
       session_key = session.put()
 
-    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.headers['Content-Type'] = 'text/html'
     self.response.headers.add_header('Access-Control-Allow-Origin','*')
+    self.response.headers.add_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
     # extract the statement to be run
     statement = self.request.get('statement')

@@ -89,7 +89,7 @@ div #shell .before_line {
 }
 div #shell #loading_line {
 	display: none;
-	background:transparent /*url(../images/loading.gif) no-repeat center left*/;
+	background:url(../images/loading.gif) no-repeat center left;
 	margin-left:10px;
 	height:16px;
 	padding-left:26px;
