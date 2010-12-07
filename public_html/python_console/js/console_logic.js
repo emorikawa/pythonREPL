@@ -10,6 +10,7 @@ question,
 _in,
 _out,
 tooManyMatches = null,
+indentlevel = 0,
 lastError = null;
  
 function refocus()
@@ -45,6 +46,27 @@ function initTarget()
 }
  
  
+// XXX should be used more consistently (instead of using selectionStart/selectionEnd throughout code)
+// XXX doesn't work in IE, even though it contains IE-specific code
+function getcaretpos(inp)
+{
+    if(inp.selectionEnd != null)
+      return inp.selectionEnd;
+
+    if(inp.createTextRange)
+    {
+      var docrange = _win.Shell.document.selection.createRange();
+      var inprange = inp.createTextRange();
+      if (inprange.setEndPoint)
+      {
+        inprange.setEndPoint('EndToStart', docrange);
+        return inprange.text.length;
+      }
+    }
+
+    return inp.value.length; // sucks, punt
+}
+
 // Unless the user is selected something, refocus the textbox.
 // (requested by caillon, brendan, asa)
 function keepFocusInTextbox(e) 
@@ -82,18 +104,25 @@ function recalculateInputHeight(new_height)
 	$("#shell").scrollTop($("#shell")[0].scrollHeight);
 }
  
- 
-function inputKeydown(e) {
+function entertab() {
+    trimmed_line = getLastInputLine().trim();
+    if (trimmed_line.charAt(trimmed_line.length-1) == ':') {
+        return true; 
+    } else {
+        return false;
+    }
+}
+
+function getLastInputLine() {
+    var last_break = _in.value.lastIndexOf('\n');
+    return _in.value.substring(last_break + 1);
+}
+
+var inputkeydown = function(e) {
   // Use onkeydown because IE doesn't support onkeypress for arrow keys
- 
- 	// Detect a paste event (code 86)
- 	if (e.keyCode == 86) {
-		// Unfortunately, we don't get the new height until slightly after the paste event fires :(
-		setTimeout("recalculateInputHeight(_in.scrollHeight);",10);
-	}
-	
-  if (e.shiftKey && e.keyCode == 13) { // shift-enter
+
     // don't do anything; allow the shift-enter to insert a line break as normal
+  if (e.shiftKey && e.keyCode == 13) {
 	new_height = parseInt(_in.style.height.replace("px","")) + 16;
 	recalculateInputHeight(new_height)
   } else if (e.altKey && e.keyCode == 13) {
@@ -101,11 +130,76 @@ function inputKeydown(e) {
 	 new_height = parseInt(_in.style.height.replace("px","")) + 16;
 	recalculateInputHeight(new_height)
 	  insertAtCaret("input", "\n");
+  } else if (e.ctrlKey && e.keyCode == 13) {
+      // If ctrl+enter is pushed. Execute the line
+        try { go(); } catch(er) { alert(er); };
+        setTimeout(function() { _in.value = ""; }, 0);
   } else if (e.keyCode == 13) { // enter
     // execute the input on enter
 	//recalculateInputHeight(16);
-    try { go(); } catch(er) { alert(er); };
-    setTimeout(function() { _in.value = ""; }, 0); // can't preventDefault on input, so clear it later
+
+  	if (language == "python") {
+        // Python is a language that needs to see whether or not we should execute on every time we push enter. We may really want to carriage return and then indent
+        if (!entertab()) {
+            // This means we shouldn't carriage return and indent more spaces
+            if (indentlevel > 0) {
+                // We're indented at least one time.
+                if (getLastInputLine().trim() == "") {
+                    // If a user pushed enter on a blank line (because she wants to break out of the current block)
+                    if (indentlevel <= 1) {
+                        // Only one level of indent. Fire on blank-line enter
+                        indentlevel = 0;
+                        try { go(); } catch(er) { alert(er); };
+                        setTimeout(function() { _in.value = ""; }, 0);
+                        return true
+                    } else {
+                        // This means that the user pushed enter on a blank line
+                        indentlevel -= 1;
+                    }
+                }
+                var indentstring = "\n";
+                for (i = 0; i < indentlevel; i ++) {
+                    indentstring = indentstring + "    ";
+                }
+                insertAtCaret("input",indentstring);
+                setTimeout("recalculateInputHeight(_in.scrollHeight);",0);
+                return false
+                // if we are indented, we should not fire off the command yet
+            } else {
+                // Fire off the command if we are not indented
+                indentlevel = 0;
+                try { go(); } catch(er) { alert(er); };
+                setTimeout(function() { _in.value = ""; }, 0);
+            }
+        } else {
+            indentlevel += 1;
+            var indentstring = "\n";
+            for (i = 0; i < indentlevel; i ++) {
+                indentstring = indentstring + "    ";
+            }
+			insertAtCaret("input",indentstring);
+		    setTimeout("recalculateInputHeight(_in.scrollHeight);",0);
+            return false
+        }
+    } else {
+        // The language does not need to worry about multi-line input
+        try { go(); } catch(er) { alert(er); };
+        setTimeout(function() { _in.value = ""; }, 0);
+    }
+
+  } else if (e.keyCode == 8) {
+        //backspace
+        var caret = getcaretpos(_in);
+        var last_break = _in.value.lastIndexOf('\n');
+        if (caret >= last_break) {
+            var substring = _in.value.substring(last_break + 1, caret);
+            if (substring.trim() == "") {
+                // This means that there's nothing but spaces
+                var numspaces = caret - last_break;
+                indentlevel = Math.floor(numspaces / 4);
+            }
+        }
+
   } else if (e.keyCode == 38) { // up
     // go up in history if at top or ctrl-up
     if (e.ctrlKey || caretInFirstLine(_in)) {
@@ -494,26 +588,6 @@ function tabcomplete()
     return i;
   }
  
-  // XXX should be used more consistently (instead of using selectionStart/selectionEnd throughout code)
-  // XXX doesn't work in IE, even though it contains IE-specific code
-  function getcaretpos(inp)
-  {
-    if(inp.selectionEnd != null)
-      return inp.selectionEnd;
- 
-    if(inp.createTextRange)
-    {
-      var docrange = _win.Shell.document.selection.createRange();
-      var inprange = inp.createTextRange();
-      if (inprange.setEndPoint)
-      {
-        inprange.setEndPoint('EndToStart', docrange);
-        return inprange.text.length;
-      }
-    }
- 
-    return inp.value.length; // sucks, punt
-  }
  
   function setselectionto(inp,pos)
   {
@@ -819,6 +893,11 @@ function go(s)
 $(document).ready(function() {
 	mysid = null;
 	sh_highlightDocument();
+
+    $("textarea#input").keydown(inputkeydown);
+    $("textarea#input").bind("paste",function(event) {
+		setTimeout("recalculateInputHeight(_in.scrollHeight);",10);
+    });
 	
 	$.ajaxSetup({
 		beforeSend: function() {
